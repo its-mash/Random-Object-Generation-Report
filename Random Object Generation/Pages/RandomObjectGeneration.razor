@@ -1,0 +1,47 @@
+﻿@page "/"
+@inherits RandomObjectGenerationBase
+
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor httpContextAccessor
+
+
+<h3>RandomObjectGeneration</h3>
+
+@if (randomObjects == null)
+{
+    <div>
+        Loading
+    </div>
+}
+else
+{
+   
+
+    foreach (var randomObject in randomObjects)
+    {
+        <div>
+            <div>Current Count: @randomObject.GetThisObjectGeneratedCount()</div>
+            <div>is Enabled @randomObject.IsEnable</div>
+            <div>Total : @randomObject.GetTotalObjectGeneratedCount()</div>
+            <div>Preferred Per: @randomObject.PreferredPercentage</div>
+            <div>Last gen: "@((MarkupString)randomObject.LastGeneratedObject)"</div>
+            <div>
+                Preferred per:
+                <input type="number" @bind="randomObject.PreferredPercentage" />
+            </div>
+            <div>
+                current percentage: @randomObject.GetCurrentPercentage()
+            </div>
+        </div>
+    }
+}
+<div>
+    <input type="number" @bind="FileSizeInKB" />
+</div>
+<div>
+    <button @onclick="StartGenerating">Start</button>
+</div>
+
+<div>
+    <button @onclick="StopGenerating">End</button>
+</div>

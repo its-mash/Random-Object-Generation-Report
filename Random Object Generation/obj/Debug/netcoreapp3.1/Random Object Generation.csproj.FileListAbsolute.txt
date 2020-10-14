@@ -49,3 +49,5 @@ C:\Users\Akash\Desktop\Random Object Generation\Random Object Generation\obj\Deb
 C:\Users\Akash\Desktop\Random Object Generation\Random Object Generation\obj\Debug\netcoreapp3.1\Random Object Generation.pdb
 C:\Users\Akash\Desktop\Random Object Generation\Random Object Generation\obj\Debug\netcoreapp3.1\Random Object Generation.genruntimeconfig.cache
 C:\Users\Akash\Desktop\Random Object Generation\Random Object Generation\obj\Debug\netcoreapp3.1\Random Object Generation.csproj.CopyComplete
+C:\Users\Akash\Desktop\Random Object Generation\Random Object Generation\obj\Debug\netcoreapp3.1\RazorDeclaration\Pages\Report.razor.g.cs
+C:\Users\Akash\Desktop\Random Object Generation\Random Object Generation\obj\Debug\netcoreapp3.1\Razor\Pages\Report.razor.g.cs

@@ -8,7 +8,7 @@ namespace Random_Object_Generation.Data
     public class FloatRandomObject : RandomObject
     {
 
-        public FloatRandomObject(double PreferredPercentage):base(PreferredPercentage)
+        public FloatRandomObject()
         {
             Type = "Float";
         }

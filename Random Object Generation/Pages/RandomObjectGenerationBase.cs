@@ -14,9 +14,23 @@ namespace Random_Object_Generation.Pages
         public IEnumerable<RandomObject> randomObjects;
         private bool Generate=false;
         private int RandomObjectCount = 3;
-        public long FileSizeInKB = 1;
+        private long fileSizeInKB = 1;
+        public long FileSizeInKB
+        {
+            get
+            {
+                return fileSizeInKB;
+            }
+            set
+            {
+                fileSizeInKB = value < 1 ? 1 : value;
+            }
+        }
         private string OutFileName = "randomObject.txt";
-        public bool AllDisabled = false;
+        public bool AtLeastOneEnabled = true;
+
+        private int totalPercentage = 0;
+        public int TotalPercentage { get { return totalPercentage; } }
         //private readonly IHttpContextAccessor _httpContextAccessor;
         //public HttpContext Context => _httpContextAccessor.HttpContext;
 
@@ -28,51 +42,85 @@ namespace Random_Object_Generation.Pages
         protected override async Task OnInitializedAsync()
         {
             await Task.Run(IntializeRandomObject);
+            Reset();
+            ReCalculatePercentage();
+        }
+
+        private void Reset()
+        {
+            int totalEnabled = 0;
+            for (int i = 0; i < randomObjects.Count(); i++)
+            {
+                randomObjects.ElementAt(i).Count = 0;
+                if (randomObjects.ElementAt(i).IsEnable)
+                    totalEnabled++;
+            }
+            RandomObject.SetTotalEnabled(totalEnabled);
+            RandomObject.Reset();
+
+            if (File.Exists(OutFileName))
+            {
+                try
+                {
+                    File.Delete(OutFileName);
+                }
+                catch
+                {
+
+                }
+            }
+
         }
 
         private void IntializeRandomObject()
         {
-            double PercentageEach = 100.0 / RandomObjectCount;
             randomObjects = new List<RandomObject>{
-                new NumericRandomObject(PercentageEach),
-                new AlphaNumericRandomObject(PercentageEach),
-                new FloatRandomObject(PercentageEach)
+                new NumericRandomObject(),
+                new AlphaNumericRandomObject(),
+                new FloatRandomObject()
             };
         }
 
         public async void StartGenerating()
         {
-            if(AllDisabled)
+            if(!AtLeastOneEnabled || TotalPercentage!=100)
                 return;
+
+            Reset();
 
             _ = Task.Run(async() =>
               {
                   Generate = true;
                   long currentFileSize = 0;
-                  if (File.Exists(OutFileName))
+                  try
                   {
-                      File.Delete(OutFileName);
-                  }
-                  using (StreamWriter outFile=File.AppendText(OutFileName))
-                  {
-                      while (Generate && currentFileSize < FileSizeInKB*1024)
+                      using (StreamWriter outFile = File.AppendText(OutFileName))
                       {
-                          int rindex = new Random().Next(RandomObjectCount);
-                          RandomObject ro = randomObjects.ElementAt(rindex);
-                          if (!ro.IsEnable) continue;
-                          _ = InvokeAsync(() =>
-                            {
-                                if (ro.GenerateNext())
+                          bool first = true;
+                          while (Generate && currentFileSize < FileSizeInKB * 1024)
+                          {
+                              int rindex = new Random().Next(RandomObjectCount);
+                              RandomObject ro = randomObjects.ElementAt(rindex);
+                              if (!ro.IsEnable) continue;
+                              _ = InvokeAsync(() =>
                                 {
-                                    outFile.WriteAsync(ro.LastGeneratedObject + ",");
-                                    currentFileSize += 4;
-                                    StateHasChanged();
-                                    currentFileSize = new FileInfo(OutFileName).Length;
-                                }
-                            });
+                                    if (ro.GenerateNext())
+                                    {
+                                        outFile.WriteAsync((first ? "" : ",") + ro.LastGeneratedObject);
+                                        currentFileSize += 4;
+                                        StateHasChanged();
+                                        currentFileSize = new FileInfo(OutFileName).Length;
+                                        first = false;
+                                    }
+                                });
 
-                          Thread.Sleep(100);
+                              Thread.Sleep(100);
+                          }
+
                       }
+                  }
+                  catch
+                  {
 
                   }
 
@@ -84,7 +132,51 @@ namespace Random_Object_Generation.Pages
         { 
             Generate = false;
         }
+        
+        public void CheckBoxClicked(RandomObject ro)
+        {
+            ro.IsEnable = !ro.IsEnable;
+            if (!ro.IsEnable)
+                ro.PreferredPercentage = 0;
 
+            AtLeastOneEnabled = false;
+            for(int i = 0; i < RandomObjectCount; i++)
+            {
+                AtLeastOneEnabled=AtLeastOneEnabled || randomObjects.ElementAt(i).IsEnable;
 
+            }
+            //StateHasChanged();
+            ReCalculatePercentage();
+        }
+
+        private void ReCalculatePercentage()
+        {
+            if (RandomObject.GetTotalEnabled() != 0)
+            {
+                int averageDistribution = 100 / RandomObject.GetTotalEnabled();
+                bool first = true;
+                int leftOver = 100 - averageDistribution * RandomObject.GetTotalEnabled();
+                for(int i = 0; i < randomObjects.Count(); i++)
+                {
+                    if (randomObjects.ElementAt(i).IsEnable)
+                    {
+                        randomObjects.ElementAt(i).PreferredPercentage = averageDistribution+(first?leftOver:0);
+                        first = false;
+                    }
+                }
+
+            }
+            totalPercentage = 100;
+        }
+
+        public void PreferredPercentageChanged(RandomObject ro, Microsoft.AspNetCore.Components.ChangeEventArgs eventArgs)
+        {
+            totalPercentage = 0;
+            ro.PreferredPercentage = Int32.Parse((string)eventArgs.Value);
+            for (int i = 0; i < randomObjects.Count(); i++)
+                totalPercentage += randomObjects.ElementAt(i).PreferredPercentage;
+        }
+
+        public bool IsGenerating => Generate;
     }
 }

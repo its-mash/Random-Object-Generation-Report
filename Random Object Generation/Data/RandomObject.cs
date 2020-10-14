@@ -7,22 +7,25 @@ namespace Random_Object_Generation.Data
 {
     public abstract class RandomObject
     {
-        protected int Count;
-        public bool IsEnable;
-        public double PreferredPercentage;
+        public int Count;
+        private bool isEnable;
+        public bool IsEnable { get { return isEnable; } set { isEnable = value; if (value) totalEnabled++; else totalEnabled--; } }
+        private int preferredPercentage; 
+        public int PreferredPercentage { get { return preferredPercentage; }set { if (value > 100) preferredPercentage = 100; else if (value < 0) preferredPercentage = 0; else preferredPercentage = value; } }
 
-        private static int TotalGenerated;
-        private static int TotalRandomObjects;
+        private static int totalEnabled=0;
+        private static int TotalRandomObjects=0;
+        private static int TotalGenerated=0;
+
         public string LastGeneratedObject;
         public abstract bool GenerateNext();
 
         public string Type = string.Empty;
-        public RandomObject(double PreferredPercentage)
+        public RandomObject()
         {
             Count = 0;
-            TotalGenerated = 0;
             IsEnable = true;
-            this.PreferredPercentage = PreferredPercentage;
+            this.PreferredPercentage = 0;
             LastGeneratedObject = null;
             TotalRandomObjects++;
         }
@@ -37,7 +40,7 @@ namespace Random_Object_Generation.Data
             Count++;
             TotalGenerated++;
         }
-        public int GetTotalObjectGeneratedCount()
+        public static int GetTotalObjectGeneratedCount()
         {
             return TotalGenerated;
         }
@@ -48,7 +51,20 @@ namespace Random_Object_Generation.Data
 
         public double GetCurrentPercentage()
         {
-            return Count * 100.0 / (TotalGenerated + TotalRandomObjects);
+            return TotalGenerated==0? 0: Count * 100.0 / (TotalGenerated);
+        }
+        public static int GetTotalEnabled()
+        {
+            return totalEnabled;
+        }
+        public static void SetTotalEnabled(int value)
+        {
+           totalEnabled=value;
+        }
+
+        public static void Reset()
+        {
+            TotalGenerated = 0;
         }
     }
 }

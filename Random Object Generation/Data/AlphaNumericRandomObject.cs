@@ -8,7 +8,7 @@ namespace Random_Object_Generation.Data
     public class AlphaNumericRandomObject : RandomObject
     {
 
-        public AlphaNumericRandomObject(double PreferredPercentage):base(PreferredPercentage)
+        public AlphaNumericRandomObject()
         {
             Type = "AlphaNumeric";
         }

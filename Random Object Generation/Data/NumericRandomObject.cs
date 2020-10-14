@@ -8,7 +8,7 @@ namespace Random_Object_Generation.Data
     public class NumericRandomObject : RandomObject
     {
 
-        public NumericRandomObject(double PreferredPercentage) : base(PreferredPercentage)
+        public NumericRandomObject()
         {
             Type = "Numeric";
         }

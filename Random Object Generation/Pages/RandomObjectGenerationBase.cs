@@ -81,14 +81,14 @@ namespace Random_Object_Generation.Pages
             };
         }
 
-        public async void StartGenerating()
+        public void StartGenerating()
         {
             if(!AtLeastOneEnabled || TotalPercentage!=100)
                 return;
 
             Reset();
 
-            _ = Task.Run(async() =>
+            Task.Run(async() =>
               {
                   Generate = true;
                   long currentFileSize = 0;
@@ -102,11 +102,11 @@ namespace Random_Object_Generation.Pages
                               int rindex = new Random().Next(RandomObjectCount);
                               RandomObject ro = randomObjects.ElementAt(rindex);
                               if (!ro.IsEnable) continue;
-                              _ = InvokeAsync(() =>
+                              await InvokeAsync(() =>
                                 {
                                     if (ro.GenerateNext())
                                     {
-                                        outFile.WriteAsync((first ? "" : ",") + ro.LastGeneratedObject);
+                                        outFile.Write((first ? "" : ",") + ro.LastGeneratedObject);
                                         currentFileSize += 4;
                                         StateHasChanged();
                                         currentFileSize = new FileInfo(OutFileName).Length;
@@ -114,7 +114,7 @@ namespace Random_Object_Generation.Pages
                                     }
                                 });
 
-                              Thread.Sleep(100);
+                              //Thread.Sleep(100);
                           }
 
                       }
